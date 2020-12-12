@@ -16,7 +16,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.asJava.getJvmSignatureDiagnostics
 import org.jetbrains.kotlin.idea.caches.project.getModuleInfo
 import org.jetbrains.kotlin.idea.caches.resolve.analyzeWithContent
-import org.jetbrains.kotlin.idea.highlighter.AbstractKotlinHighlightingPass.Companion.annotateDiagnostic
+import org.jetbrains.kotlin.idea.highlighter.KotlinHighlightingPass.Companion.annotateDiagnostic
 import org.jetbrains.kotlin.idea.project.TargetPlatformDetector
 import org.jetbrains.kotlin.idea.util.ProjectRootsUtil
 import org.jetbrains.kotlin.platform.jvm.isJvm

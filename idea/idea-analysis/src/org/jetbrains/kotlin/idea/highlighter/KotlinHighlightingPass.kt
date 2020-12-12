@@ -5,15 +5,19 @@
 
 package org.jetbrains.kotlin.idea.highlighter
 
+import com.intellij.codeHighlighting.*
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.lang.annotation.AnnotationBuilder
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.progress.ProcessCanceledException
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.util.containers.MultiMap
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.diagnostics.Diagnostic
@@ -29,7 +33,7 @@ import org.jetbrains.kotlin.types.KotlinType
 import java.lang.reflect.*
 import java.util.*
 
-abstract class AbstractKotlinHighlightingPass(file: KtFile, document: Document) :
+open class KotlinHighlightingPass(file: KtFile, document: Document) :
     AbstractBindingContextAwareHighlightingPassBase(file, document) {
     override val annotator: Annotator
         get() = KotlinAfterAnalysisAnnotator()
@@ -104,6 +108,30 @@ abstract class AbstractKotlinHighlightingPass(file: KtFile, document: Document) 
 
 
     protected open fun shouldSuppressUnusedParameter(parameter: KtParameter): Boolean = false
+//    override fun shouldSuppressUnusedParameter(parameter: KtParameter): Boolean {
+//        val grandParent = parameter.parent.parent as? KtNamedFunction ?: return false
+//        if (!UnusedSymbolInspection.isEntryPoint(grandParent)) return false
+//        return grandParent.isMainFunction()
+//    }
+
+    class Factory : TextEditorHighlightingPassFactory {
+        override fun createHighlightingPass(file: PsiFile, editor: Editor): TextEditorHighlightingPass? {
+            if (file !is KtFile) return null
+            return KotlinHighlightingPass(file, editor.document)
+        }
+    }
+
+    class Registrar : TextEditorHighlightingPassFactoryRegistrar {
+        override fun registerHighlightingPassFactory(registrar: TextEditorHighlightingPassRegistrar, project: Project) {
+            registrar.registerTextEditorHighlightingPass(
+                Factory(),
+                null,
+                intArrayOf(Pass.UPDATE_ALL),
+                false,
+                -1
+            )
+        }
+    }
 
     companion object {
         fun createQuickFixes(diagnostic: Diagnostic): Collection<IntentionAction> =
