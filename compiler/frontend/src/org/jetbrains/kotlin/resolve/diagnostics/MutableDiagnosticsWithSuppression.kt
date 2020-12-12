@@ -56,7 +56,8 @@ class MutableDiagnosticsWithSuppression(
     }
 
     fun report(diagnostic: Diagnostic) {
-        diagnosticsCallback?.callback(diagnostic)
+        // TODO:
+//        diagnosticsCallback?.callback(diagnostic)
         diagnosticList.add(diagnostic)
         modificationTracker.incModificationCount()
     }
